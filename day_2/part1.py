@@ -1,82 +1,42 @@
-class Game:
-    def __init__(self, line):
-        # Initialize the color lists
-        self.red_list = []
-        self.green_list = []
-        self.blue_list = []
+def is_game_possible(game_record, red_limit, green_limit, blue_limit):
+    combinations = game_record.split('; ')
 
-        # Remove the initial part (e.g., "Game 1:") and then split the line
-        parts = line.split(':')[1].strip().split(';')
-        for part in parts:
-            color_values = part.split(',')
-            for color_value in color_values:
-                color_value = color_value.strip()
-                if color_value:
-                    # Split and check if the result has exactly two elements
-                    split_values = color_value.split()
-                    if len(split_values) == 2:
-                        value, color = split_values
-                        value = int(value)
-                        if 'red' in color:
-                            self.add_red(value)
-                        elif 'green' in color:
-                            self.add_green(value)
-                        elif 'blue' in color:
-                            self.add_blue(value)
-                    else:
-                        print(f"Invalid format in color-value pair: '{color_value}'")
-                        self.add_blue(value)
+    for combo in combinations:
+        red_count, green_count, blue_count = 0, 0, 0
+        for color_count in combo.split(', '):
+            count, color = color_count.split()
+            count = int(count)
+            if color == 'red':
+                red_count += count
+            elif color == 'green':
+                green_count += count
+            elif color == 'blue':
+                blue_count += count
 
-    red_list = []
-    green_list = []
-    blue_list = []
+        if red_count > red_limit or green_count > green_limit or blue_count > blue_limit:
+            return False
 
-    def add_green(self, value):
-        self.green_list.append(value)
-
-    def add_red(self, value):
-        self.red_list.append(value)
-
-    def add_blue(self, value):
-        self.blue_list.append(value)
-
-    def get_biggest_red(self):
-        return max(self.red_list)
-
-    def get_biggest_green(self):
-        return max(self.green_list)
-
-    def get_biggest_blue(self):
-        return max(self.blue_list)
+    return True
 
 
-def main():
-    games = []
-    with open('input.txt', 'r') as file:
-        for line in file:
-            game = Game(line)
-            print(game.get_biggest_red())
-            print(game.get_biggest_green())
-            print(game.get_biggest_blue())
-            games.append(game)
+def process_game_data(file_path, red_limit, green_limit, blue_limit):
+    with open(file_path, 'r') as file:
+        game_data = file.readlines()
 
-    valid_games_IDs = []
-    i = 1
-    while i < len(games):
-        if games[i].get_biggest_red() <= 12:
-            if games[i].get_biggest_green() <= 13:
-                if games[i].get_biggest_blue() <= 14:
+    possible_games = []
+    for record in game_data:
+        game_id, game_record = record.split(': ')
+        game_id = int(game_id.split()[1])
+        if is_game_possible(game_record, red_limit, green_limit, blue_limit):
+            possible_games.append(game_id)
+
+    return sum(possible_games), possible_games
 
 
-                    valid_games_IDs.append(i)
-        i += 1
-    print(valid_games_IDs)
+file_path = 'input.txt'
+red_limit, green_limit, blue_limit = 12, 13, 14
 
-    sum_of_valid_games = sum(valid_games_IDs)
-    print(sum_of_valid_games)
+sum_possible_games, possible_games = process_game_data(file_path, red_limit, green_limit, blue_limit)
+print(f'Possible games: {possible_games}')
+print(f'Sum of possible games: {sum_possible_games}')
 
-
-
-
-if __name__ == '__main__':
-    main()
